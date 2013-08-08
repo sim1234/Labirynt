@@ -146,7 +146,7 @@ def make2(b, x, y):
             x , y = bre(t) 
         else:
             j[8] = 1
-            route(b, t, x, y, j)     
+            route(b, t, x, y, j)   
             x , y = bre(t)
             
         
@@ -156,6 +156,123 @@ def genmaze(b):
     make2(b, x, y)
     #make(b, 5, 5)
 
+
+#
+#         Dane:                                               Wynik:     
+# 
+#           0                                                   0
+#         _______                                             _______
+#        |                                                   |      |
+#     1  |                                                1  |      |  3
+#        |                                                   |______|
+#
+#                                                               2
+#
+#    0 - gorna scianka                                  0 - gorna scianka   
+#    1 - lewa scianka                                   1 - lewa scianka 
+#    2, 3 - twardosc kolejnych scianek                  2 - dolna scianka
+#    4 - przetworzone                                   3 - prawa scianka
+#                                                       4, 5, 6, 7 - twardosc kolejnych scianek
+#                                                       8 - przetworzone
+#
+#
+
+
+def emptycell():
+    return [1, 1, 0, 0, 0]
+
+class Board_i(object):
+    def __init__(self, sx, sy, EmptyCell, teleport=False):
+        assert int(sx) > 2 and int(sy) > 2
+        sx, sy = int(sx), int(sy)
+        self.cell = EmptyCell
+        self.m = [[self.cell() for x in xrange(0, int(sy + 1))] for x in xrange(0, int(sx + 1))]
+        self.tele = bool(teleport)
+
+
+    def _access(self, px, py):
+        if self.tele:
+            px = norm(px, 0, len(self.m))
+            py = norm(py, 0, len(self.m[0]))
+        else:
+            if px < 0 or px >= len(self.m) or py < 0 or py >= len(self.m[0]):
+                raise IndexError("Px or Py out of range!")
+        return self.m[px][py]
+    
+    def access(self, px, py):
+        a = self._access(px, py) # main
+        b = self._access(px + 1, py) # next to the right
+        c = self._access(px, py + 1) # lower
+        return [a[0], a[1], b[1], c[0], a[2], a[3], b[3], c[2], a[4]]
+    
+    def save(self, px, py, state):
+        a = self._access(px, py) # main
+        b = self._access(px + 1, py) # next to the right
+        c = self._access(px, py + 1) # lower
+        a[0], a[1], b[1], c[0], a[2], a[3], b[3], c[2], a[4] = state
+        
+    def bre(self, t):
+        e = t.pop()
+        if not e[3][8]:
+            tt = ch(e[2])
+            e[4][tt] = 0 # obalenie sciany tej komorki
+            tt += 2
+            if tt >= 4:
+                tt -= 4
+            e[3][tt] = 0 # obalenie sciany drugiej komorki
+            #e[3][8] = 1 # bylem tu
+        return e[0], e[1]
+    
+    def route(self, t, x, y, j):
+        l = [(1,0), (-1,0), (0,1), (0,-1)]
+        tm = []
+        for n in l:
+            try:
+                r = self.access(x+n[0], y+n[1])
+                if (not r[8]) and (not r[ch(n) + 4]):
+                    tm.append((x+n[0], y+n[1], n, r, j))
+            except IndexError:
+                pass
+        if tm == []:
+            return tm
+        random.shuffle(tm)
+        t.extend(tm)
+        return tm
+    
+    def make2(self, b, x, y):
+        t = []
+        mtmp = 1
+        while len(t) or mtmp:
+            mtmp = 0
+            j = b.access(x, y)
+            
+            if j[8]:
+                x , y = bre(t) 
+            else:
+                j[8] = 1
+                route(b, t, x, y, j)   
+                x , y = bre(t)
+                
+                
+    def make(self, x, y):
+        t = []
+        mtmp = 1
+        while len(t) or mtmp:
+            mtmp = 0
+            j = self.access(x, y)
+            
+            if j[8]:
+                x , y = bre(t) 
+            else:
+                j[8] = 1 #
+                self.route(t, x, y, j)  
+                x , y = bre(t)
+                
+            
+    def genmaze(self):
+        x = random.randint(0, len(self.m)-1)
+        y = random.randint(0, len(self.m[0])-1)
+        self.make(x, y)
 
     
 
