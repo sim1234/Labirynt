@@ -177,6 +177,11 @@ def genmaze(b):
 #
 #
 
+def ch2(c):
+    if c == (0,-1): return 0
+    if c == (-1, 0): return 1
+    if c == (0, 1): return 2
+    if c == (1,0): return 3
 
 def emptycell():
     return [1, 1, 0, 0, 0]
@@ -196,62 +201,48 @@ class Board_i(object):
             py = norm(py, 0, len(self.m[0]))
         else:
             if px < 0 or px >= len(self.m) or py < 0 or py >= len(self.m[0]):
-                raise IndexError("Px or Py out of range!")
+                raise IndexError("Px or Py out of range! (%d, %d)" % (px, py))
         return self.m[px][py]
     
     def access(self, px, py):
-        a = self._access(px, py) # main
-        b = self._access(px + 1, py) # next to the right
-        c = self._access(px, py + 1) # lower
-        return [a[0], a[1], b[1], c[0], a[2], a[3], b[3], c[2], a[4]]
+        #if px < 0 or px >= len(self.m) - 1 or py < 0 or py >= len(self.m[0]) - 1:
+        #    raise IndexError("Px or Py out of range! (%d, %d)" % (px, py))
+        a = self._access(px, py)
+        b = self._access(px, py + 1)
+        c = self._access(px + 1, py)
+        return [a[0], a[1], b[0], c[1], a[2], a[3], b[2], c[3], a[4] ]
     
     def save(self, px, py, state):
-        a = self._access(px, py) # main
-        b = self._access(px + 1, py) # next to the right
-        c = self._access(px, py + 1) # lower
-        a[0], a[1], b[1], c[0], a[2], a[3], b[3], c[2], a[4] = state
+        a = self._access(px, py)
+        b = self._access(px, py + 1)
+        c = self._access(px + 1, py)
+        a[0], a[1], b[0], c[1], a[2], a[3], b[2], c[3], a[4] = state
         
     def bre(self, t):
         e = t.pop()
-        if not e[3][8]:
-            tt = ch(e[2])
-            e[4][tt] = 0 # obalenie sciany tej komorki
-            tt += 2
-            if tt >= 4:
-                tt -= 4
-            e[3][tt] = 0 # obalenie sciany drugiej komorki
-            #e[3][8] = 1 # bylem tu
+        j = self.access(e[0], e[1])
+        if not j[8]:
+            tt = ch2(e[2])
+            j[tt] = 0 # obalenie sciany tej komorki
+            self.save(e[0], e[1], j)
         return e[0], e[1]
     
-    def route(self, t, x, y, j):
+    def route(self, x, y, j):
         l = [(1,0), (-1,0), (0,1), (0,-1)]
         tm = []
         for n in l:
             try:
                 r = self.access(x+n[0], y+n[1])
                 if (not r[8]) and (not r[ch(n) + 4]):
-                    tm.append((x+n[0], y+n[1], n, r, j))
+                    n1 = (n[0]*-1, n[1]*-1)
+                    tm.append((x+n[0], y+n[1], n1))
             except IndexError:
                 pass
-        if tm == []:
-            return tm
-        random.shuffle(tm)
-        t.extend(tm)
+        if tm:
+            random.shuffle(tm)
         return tm
     
-    def make2(self, b, x, y):
-        t = []
-        mtmp = 1
-        while len(t) or mtmp:
-            mtmp = 0
-            j = b.access(x, y)
-            
-            if j[8]:
-                x , y = bre(t) 
-            else:
-                j[8] = 1
-                route(b, t, x, y, j)   
-                x , y = bre(t)
+   
                 
                 
     def make(self, x, y):
@@ -261,18 +252,20 @@ class Board_i(object):
             mtmp = 0
             j = self.access(x, y)
             
-            if j[8]:
-                x , y = bre(t) 
-            else:
-                j[8] = 1 #
-                self.route(t, x, y, j)  
-                x , y = bre(t)
+            if not j[8]:
+                t += self.route(x, y, j)
+            j[8] = 1 #
+            self.save(x, y, j)
+            x , y = self.bre(t)
                 
             
     def genmaze(self):
-        x = random.randint(0, len(self.m)-1)
-        y = random.randint(0, len(self.m[0])-1)
+        x = random.randint(0, len(self.m)-2)
+        y = random.randint(0, len(self.m[0])-2)
         self.make(x, y)
+        
+    
+            
 
     
 
