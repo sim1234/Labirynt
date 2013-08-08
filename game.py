@@ -20,7 +20,7 @@ class game:
         self.fpsclock = pygame.time.Clock()
         #self.b = Board(20, 20, fn, 0, 0)
         #genmaze(self.b)
-        self.b = Board_i(8, 12, emptycell, 0)
+        self.b = Maze(8, 12, 0)
         #self.b.save(2,3, [0,0,0,0,0,0,0,0,0])
         self.b.genmaze()
     
@@ -63,38 +63,17 @@ class game:
         c = (0,0,0)
         t = 2
         x = 0
-        while x < len(self.b.m):
+        while x < len(self.b.data):
             y = 0
-            while y < len(self.b.m[0]):
-                o = self.b.m[x][y]
-                if o[0]:
+            while y < len(self.b.data[0]):
+                cell = self.b.data[x][y]
+                if cell[0]:
                     pygame.draw.line(self.bufor, c, (rx*x,ry*y), (rx*x+rx,ry*y), t)
-                if o[1]:
+                if cell[1]:
                     pygame.draw.line(self.bufor, c, (rx*x,ry*y), (rx*x,ry*y+ry), t)
                 y += 1
             x += 1
         
 
 
-    def frame2(self):
-        rx = 10
-        ry = 10
-        c = (0,0,0)
-        t = 2
-        x = 0
-        while x < len(self.b.m):
-            y = 0
-            while y < len(self.b.m[0]):
-                o = self.b.m[x][y]
-                if o[0]:
-                    pygame.draw.line(self.bufor, c, (rx*x,ry*y), (rx*x+rx,ry*y), t)
-                if o[1]:
-                    pygame.draw.line(self.bufor, c, (rx*x+rx,ry*y), (rx*x+rx,ry*y+ry), t)
-                if o[3]:
-                    pygame.draw.line(self.bufor, c, (rx*x,ry*y), (rx*x,ry*y+ry), t)
-                if o[2]:
-                    pygame.draw.line(self.bufor, c, (rx*x,ry*y+ry), (rx*x+rx,ry*y+ry), t)
-                y += 1
-            x += 1
-        #pygame.draw.circle(self.bufor, (255,0,0), (50,50), 0)
 
