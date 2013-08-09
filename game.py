@@ -8,6 +8,7 @@ from board import *
 class game:
     def __init__(self, a_w, a_h):
         pygame.init()
+        #pygame.key.set_repeat(1, 1)
         self.a_w = a_w
         self.a_h = a_h
         self.tryb = 1
@@ -20,9 +21,9 @@ class game:
         self.fpsclock = pygame.time.Clock()
         #self.b = Board(20, 20, fn, 0, 0)
         #genmaze(self.b)
-        self.b = Maze(8, 12, 0)
+        self.b = Maze(9, 9, 0)
         #self.b.save(2,3, [0,0,0,0,0,0,0,0,0])
-        self.b.genmaze()
+        self.b.generate()
     
     def printt(self, px, py, text, bit = None, size=10, color=(0,0,0), bgcolor=(200,200,200)):
         if bit == None:
@@ -38,7 +39,17 @@ class game:
         events = pygame.event.get()
         self.keys = pygame.key.get_pressed()
         for event in events:
-            if event.type == pygame.QUIT: self.tryb = 0
+            if event.type == pygame.QUIT:
+                self.tryb = 0
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_g:
+                    self.b.clear()
+                    self.b.generate()
+                if event.key == pygame.K_c:
+                    self.b.clear()
+                if event.key == pygame.K_s:
+                    self.b.solve(self.draw_line)
+                
         
         if self.keys[pygame.K_BACKQUOTE]:
             self.printt(self.a_w-18, self.a_h-10, str(int(self.fpsclock.get_fps())))
@@ -57,23 +68,12 @@ class game:
             self.endframe()
 
 
+    def draw_line(self, (p1x, p1y), (p2x, p2y)):
+        pygame.draw.line(self.bufor, (0,0,0), (p1x + 15, p1y + 15), (p2x + 15, p2y + 15), 2)
+
+
     def frame(self):
-        rx = 10
-        ry = 10
-        c = (0,0,0)
-        t = 2
-        x = 0
-        while x < len(self.b.data):
-            y = 0
-            while y < len(self.b.data[0]):
-                cell = self.b.data[x][y]
-                if cell[0]:
-                    pygame.draw.line(self.bufor, c, (rx*x,ry*y), (rx*x+rx,ry*y), t)
-                if cell[1]:
-                    pygame.draw.line(self.bufor, c, (rx*x,ry*y), (rx*x,ry*y+ry), t)
-                y += 1
-            x += 1
-        
+        self.b.draw(self.draw_line, 10, 10)
 
 
 
